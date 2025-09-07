@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Visitor counter backend (API Gateway -> Lambda -> DynamoDB)
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 5
+    MemorySize: 128
+    Architectures: [ x86_64 ]
+    Environment:
+      Variables:
+        TABLE_NAME: VisitorCount
+        PARTITION_KEY: id
+        PARTITION_VALUE: visitors
+
+Resources:
+  PythonVisitorCount:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: lambda_function.lambda_handler
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:UpdateItem
+                - dynamodb:GetItem
+              Resource: arn:aws:dynamodb:eu-north-1:078346805371:table/VisitorCount
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: "*"
+      Events:
+        CountGet:
+          Type: Api
+          Properties:
+            Path: /count
+            Method: GET
+
+Outputs:
+  ApiUrl:
+    Description: API base invoke URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  CountEndpoint:
+    Description: Full /count endpoint
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/count"
