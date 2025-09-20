@@ -3,7 +3,8 @@ name: Deploy Backend (SAM)
 on:
   push:
     branches:
-      - main   # change if you deploy from another branch
+      - main
+  workflow_dispatch: {}
 
 jobs:
   deploy:
@@ -11,12 +12,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.9"   # must match your Lambda runtime in template.yaml
 
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
@@ -32,5 +33,14 @@ jobs:
         run: sam build
 
       - name: Deploy SAM app
-        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name sam-app --config-env default
+        run: |
+          sam deploy \
+            --stack-name sam-app \
+            --resolve-s3 \
+            --capabilities CAPABILITY_IAM \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --region eu-north-1
 
+      - name: Show outputs
+        run: aws cloudformation describe-stacks --stack-name sam-app --query "Stacks[0].Outputs" --output table
