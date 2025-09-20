@@ -33,14 +33,11 @@ jobs:
         run: sam build
 
       - name: Deploy SAM app
-        run: |
-          sam deploy \
-            --no-confirm-changeset \
-            --no-fail-on-empty-changeset \
-            --stack-name sam-app \
-            --capabilities CAPABILITY_IAM \
-            --resolve-s3 \
-            --region eu-north-1
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset \
+          --stack-name sam-app \
+          --capabilities CAPABILITY_IAM \
+          --resolve-s3 \
+          --region eu-north-1
 
       - name: Export API Gateway URL
         id: apigw
@@ -49,13 +46,11 @@ jobs:
             --stack-name sam-app \
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
             --output text)
-          echo "api_url=$url" >> $GITHUB_OUTPUT
+          echo "api_url=$url" >> $GITHUB_ENV
 
       - name: Save API Gateway URL as artifact
-        uses: actions/upload-artifact@v4
+        run: echo "${{ env.api_url }}" > apigw.txt
+      - uses: actions/upload-artifact@v4
         with:
           name: api-gateway-url
-          path: |
-            ${{ github.workspace }}/apigw.txt
-        # create the file before upload
-        run: echo "${{ steps.apigw.outputs.api_url }}" > ${{ github.workspace }}/apigw.txt
+          path: apigw.txt
