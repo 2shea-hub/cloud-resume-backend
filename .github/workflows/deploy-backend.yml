@@ -14,8 +14,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: "3.13"
 
@@ -48,7 +48,6 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
             --output text)
           echo "api_url=$url" >> $GITHUB_OUTPUT
-          echo "$url" > ${{ github.workspace }}/apigw.txt
 
       - name: Save API Gateway URL as artifact
         uses: actions/upload-artifact@v4
