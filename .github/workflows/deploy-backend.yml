@@ -46,10 +46,10 @@ jobs:
             --stack-name sam-app \
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
             --output text)
-          echo "api_url=$url" >> $GITHUB_ENV
+          echo "api_url=$url" >> $GITHUB_OUTPUT
 
       - name: Save API Gateway URL as artifact
-        run: echo "${{ env.api_url }}" > apigw.txt
+        run: echo "${{ steps.apigw.outputs.api_url }}" > apigw.txt
       - uses: actions/upload-artifact@v4
         with:
           name: api-gateway-url
