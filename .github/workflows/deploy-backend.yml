@@ -52,8 +52,10 @@ jobs:
           echo "api_url=$url" >> $GITHUB_OUTPUT
 
       - name: Save API Gateway URL as artifact
-        run: echo "${{ steps.apigw.outputs.api_url }}" > apigw.txt
-      - uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: api-gateway-url
-          path: apigw.txt
+          path: |
+            ${{ github.workspace }}/apigw.txt
+        # create the file before upload
+        run: echo "${{ steps.apigw.outputs.api_url }}" > ${{ github.workspace }}/apigw.txt
