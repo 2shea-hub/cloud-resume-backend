@@ -1,3 +1,11 @@
+name: Deploy Backend (SAM)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,12 +18,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.13"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run tests
-        run: pytest
 
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
@@ -37,3 +39,19 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --resolve-s3 \
             --region eu-north-1
+
+      - name: Export API Gateway URL
+        id: apigw
+        run: |
+          url=$(aws cloudformation describe-stacks \
+            --stack-name sam-app \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
+            --output text)
+          echo "api_url=$url" >> $GITHUB_OUTPUT
+          echo "$url" > apigw.txt
+
+      - name: Save API Gateway URL as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-gateway-url
+          path: apigw.txt
