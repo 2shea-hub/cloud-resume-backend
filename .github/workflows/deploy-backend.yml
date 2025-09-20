@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.13"
+          python-version: "3.9"   # Match Lambda runtime
 
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
@@ -48,6 +48,7 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
             --output text)
           echo "api_url=$url" >> $GITHUB_OUTPUT
+          echo $url > ${{ github.workspace }}/apigw.txt
 
       - name: Save API Gateway URL as artifact
         uses: actions/upload-artifact@v4
