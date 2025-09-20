@@ -48,11 +48,14 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" \
             --output text)
           echo "api_url=$url" >> $GITHUB_OUTPUT
+      
 
-      - name: Save API Gateway URL as artifact
+      
+      - name: Save API Gateway URL to file
+        run: echo "${{ steps.apigw.outputs.api_url }}" > ${{ github.workspace }}/apigw.txt
+
+      - name: Upload API Gateway URL as artifact
         uses: actions/upload-artifact@v4
         with:
           name: api-gateway-url
-          path: |
-            ${{ github.workspace }}/apigw.txt
-        run: echo "${{ steps.apigw.outputs.api_url }}" > ${{ github.workspace }}/apigw.txt
+          path: ${{ github.workspace }}/apigw.txt
